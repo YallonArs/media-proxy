@@ -68,7 +68,7 @@ void VirtualCamera::open() {
 		throw std::runtime_error("Failed to open " + path);
 }
 
-int VirtualCamera::write_frame(byte* frame, uint32_t length) {
+void VirtualCamera::write_frame(byte* frame, uint32_t length) {
 	if (::write(fd, frame, length) == -1)
 		throw std::runtime_error("cannot write frame");
 }

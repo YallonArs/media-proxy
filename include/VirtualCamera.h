@@ -15,5 +15,5 @@ public:
 
 	void configure();
 	void open();
-	int write_frame(byte* frame, uint32_t length);
+	void write_frame(byte* frame, uint32_t length);
 };
