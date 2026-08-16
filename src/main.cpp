@@ -88,10 +88,7 @@ int main(int argc, char *argv[]) {
 			trigger_hotkey();
 		}
 
-		const ssize_t written = virtual_camera.write_frame(new_frame, capture.get_frame_size_bytes());
-		if (written < 0) {
-			std::cerr << "Write to virtual camera failed :c" << endl;
-		}
+		virtual_camera.write_frame(new_frame, capture.get_frame_size_bytes());
 		if (cv::waitKey(1)) {};
 	}
 
