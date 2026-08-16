@@ -4,6 +4,8 @@
 #include <random>
 
 #include "utils.h"
+#include "VideoDevice.h"
+#include <cstring>
 
 namespace fs = std::filesystem;
 
@@ -68,4 +70,28 @@ int randomint(int start, int end) {
 
 uint8_t randombyte() {
 	return static_cast<uint8_t>(randomint(0, 255));
+}
+
+void print_usage(char *exec) {
+	std::cout << "Usage:\n"
+		 << exec << " /dev/videoX" << std::endl;
+	std::cout << "Available devices:" << std::endl;
+	for (auto filename : VideoDevice::list_all())
+		std::cout << "- " << filename << std::endl;
+}
+
+string parse_args(int argc, char *argv[]) {
+	if (argc != 2) {
+		print_usage(argv[0]);
+		throw std::runtime_error("invalid number of args");
+	}
+	if (strcmp(argv[1], "-h") == 0) {
+		print_usage(argv[0]);
+		return "";
+	}
+	if (!fs::exists(argv[1])) {
+		throw std::runtime_error("Path " + string(argv[1]) + " does not exist!");
+	}
+
+	return argv[1];
 }

@@ -38,14 +38,6 @@ inline void signal_handler(int _signum) {
 	g_signal_received = 1;
 }
 
-void print_usage(char *exec) {
-	cout << "Usage:\n"
-		 << exec << " /dev/videoX" << endl;
-	cout << "Available devices:" << endl;
-	for (auto filename : VideoDevice::list_all())
-		cout << "- " << filename << endl;
-}
-
 void filter(cv::Mat frame, byte *new_frame) {
 	for (uint32_t i = 0; i < frame.total() * 3; i++) {
 		new_frame[i] = 255 - frame.data[i];
@@ -54,25 +46,8 @@ void filter(cv::Mat frame, byte *new_frame) {
 
 void trigger_hotkey() {
 	is_paused = !is_paused;
-	cout << "hotkey detected" << endl;
+	cout << "cpp: hotkey detected" << endl;
 }
-
-string parse_args(int argc, char *argv[]) {
-	if (argc != 2) {
-		print_usage(argv[0]);
-		throw std::runtime_error("invalid number of args");
-	}
-	if (strcmp(argv[1], "-h") == 0) {
-		print_usage(argv[0]);
-		return "";
-	}
-	if (!fs::exists(argv[1])) {
-		throw std::runtime_error("Path " + string(argv[1]) + " does not exist!");
-	}
-
-	return argv[1];
-}
-
 
 int main(int argc, char *argv[]) {
 	// some shit

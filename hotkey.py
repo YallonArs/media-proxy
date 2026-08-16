@@ -8,7 +8,7 @@ if os.path.exists(SOCKET_PATH):
 	os.remove(SOCKET_PATH)
 
 def on_triggered(s: socket.socket):
-	print("hotkey detected")
+	print("python: hotkey detected")
 	s.send(b"1")
 
 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
