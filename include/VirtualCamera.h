@@ -13,7 +13,7 @@ public:
 	~VirtualCamera();
 	string name;
 
-	int configure();
+	void configure();
 	void open();
 	int write_frame(byte* frame, uint32_t length);
 };

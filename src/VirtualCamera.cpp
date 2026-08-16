@@ -42,7 +42,7 @@ VirtualCamera::~VirtualCamera() {
 	}
 }
 
-int VirtualCamera::configure() {
+void VirtualCamera::configure() {
 	struct v4l2_format vid_format;
 	memset(&vid_format, 0, sizeof(vid_format));
 	vid_format.type					= V4L2_BUF_TYPE_VIDEO_OUTPUT;
@@ -56,22 +56,19 @@ int VirtualCamera::configure() {
 
 	int v4l2_fd = ::open(path.c_str(), O_WRONLY);
 	if (ioctl(v4l2_fd, VIDIOC_S_FMT, &vid_format) < 0) {
-		std::cerr << "Failed to set video format on virtual camera" << std::endl;
 		close(v4l2_fd);
-		return 1;
+		throw std::runtime_error("Failed to set video format on virtual camera");
 	}
 	close(v4l2_fd);
-
-	return 0;
 }
 
 void VirtualCamera::open() {
 	fd = ::open(path.c_str(), O_WRONLY);
-	if (fd < 0) {
-		throw std::runtime_error("Failed to open " + path);;
-	}
+	if (fd < 0)
+		throw std::runtime_error("Failed to open " + path);
 }
 
 int VirtualCamera::write_frame(byte* frame, uint32_t length) {
-	return ::write(fd, frame, length);
+	if (::write(fd, frame, length) == -1)
+		throw std::runtime_error("cannot write frame");
 }

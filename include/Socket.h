@@ -1,14 +1,15 @@
 #pragma once
 
 #include <string>
+#include "utils.h"
 
 class Socket {
 protected:
-	std::string path;
+	string path;
 	int fd;
 	bool is_opened = false;
 public:
-	Socket(const std::string path);
+	Socket(const string path);
 	~Socket();
 
 	void connect();
