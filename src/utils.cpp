@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <glob.h>
 #include <random>
+#include <algorithm>
 
 #include "utils.h"
 #include "VideoDevice.h"
