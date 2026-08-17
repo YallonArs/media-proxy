@@ -18,10 +18,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "VirtualCamera.h"
 #include "CameraCapture.h"
 #include "Socket.h"
 #include "VideoDevice.h"
+#include "VirtualCamera.h"
 #include "utils.h"
 
 using std::cout;
@@ -32,7 +32,7 @@ const uint16_t VIRTUAL_CAMERA_ID = 10;
 const string SOCKET_PATH		 = "./hotkey-socket.s";
 
 volatile sig_atomic_t g_signal_received = 0;
-bool is_paused							= false;
+std::atomic<bool> is_paused				= false;
 
 inline void signal_handler(int _signum) {
 	g_signal_received = 1;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	cout << "starting" << endl;
 
 	uint32_t frame_size_bytes = capture.get_frame_size_bytes();
-	byte *new_frame = new byte[frame_size_bytes];
+	vector<byte> new_frame(frame_size_bytes);
 
 	while (!g_signal_received) {
 		if (!is_paused) {
@@ -82,17 +82,15 @@ int main(int argc, char *argv[]) {
 		if (frame.empty()) continue;
 
 		// filter(frame, new_frame);
-		memcpy(new_frame, frame.data, frame_size_bytes);
+		memcpy(new_frame.data(), frame.data, frame_size_bytes);
 
 		if (sock.check_data()) {
 			trigger_hotkey();
 		}
 
-		virtual_camera.write_frame(new_frame, capture.get_frame_size_bytes());
+		virtual_camera.write_frame(new_frame.data(), capture.get_frame_size_bytes());
 		if (cv::waitKey(1)) {};
 	}
-
-	delete[] new_frame;
 
 	return 0;
 }

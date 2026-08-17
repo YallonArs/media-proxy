@@ -22,6 +22,7 @@ VirtualCamera::VirtualCamera(const uint8_t id, const Resolution resolution, cons
 		std::cerr << "cannot create " + path + ", it already exists.";
 	}
 
+	// TODO: harden from injection
 	const string command = std::format("sudo modprobe v4l2loopback video_nr={} width={} height={} exclusive_caps=1 card_label=\"{}\"", id, resolution.width, resolution.height, name);
 
 	int result = std::system(command.c_str());
@@ -30,7 +31,7 @@ VirtualCamera::VirtualCamera(const uint8_t id, const Resolution resolution, cons
 	}
 }
 
-VirtualCamera::VirtualCamera(const string path, const Resolution size, const string& name) : VirtualCamera(VideoDevice::path_to_idx(path), resolution, name) {}
+VirtualCamera::VirtualCamera(const string path, const Resolution resolution, const string& name) : VirtualCamera(VideoDevice::path_to_idx(path), resolution, name) {}
 
 VirtualCamera::~VirtualCamera() {
 	// const string command = "sudo v4l2loopback-ctl delete " + path;
@@ -38,7 +39,8 @@ VirtualCamera::~VirtualCamera() {
 	
 	int result = std::system("sudo modprobe -r v4l2loopback");
 	if (WEXITSTATUS(result) != 0) {
-		throw std::runtime_error("Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)));
+		// throw std::runtime_error("Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)));
+		std::cerr << "Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)) << endl;
 	}
 }
 
@@ -72,4 +74,6 @@ int VirtualCamera::write_frame(byte* frame, uint32_t length) {
 	int written = ::write(fd, frame, length);
 	if (written == -1)
 		throw std::runtime_error("cannot write frame");
+
+	return written;
 }

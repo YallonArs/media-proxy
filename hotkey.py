@@ -20,5 +20,4 @@ with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
 	with conn:
 		print("Client connected!")
 		keyboard.add_hotkey('ctrl+shift+a', lambda: on_triggered(conn))
-		while True:
-			pass
+		keyboard.wait()
