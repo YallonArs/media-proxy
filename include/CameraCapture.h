@@ -11,8 +11,7 @@ protected:
 	cv::VideoCapture capture;
 
 public:
-	CameraCapture(const uint8_t id);
-	CameraCapture(const string path);
+	using VideoDevice::VideoDevice;
 	~CameraCapture();
 
 	void open();

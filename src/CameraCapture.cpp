@@ -2,9 +2,6 @@
 
 #include <stdexcept>
 
-CameraCapture::CameraCapture(const uint8_t id) : VideoDevice(id) {};
-CameraCapture::CameraCapture(const string path) : CameraCapture(VideoDevice::path_to_idx(path)) {};
-
 CameraCapture::~CameraCapture() {
 	if (capture.isOpened())
 		capture.release();

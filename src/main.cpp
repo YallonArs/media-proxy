@@ -38,7 +38,7 @@ inline void signal_handler(int _signum) {
 	g_signal_received = 1;
 }
 
-void filter(cv::Mat frame, byte *new_frame) {
+void filter_video(cv::Mat frame, byte *new_frame) {
 	for (uint32_t i = 0; i < frame.total() * 3; i++) {
 		new_frame[i] = 255 - frame.data[i];
 	}
@@ -75,20 +75,20 @@ int main(int argc, char *argv[]) {
 	vector<byte> new_frame(frame_size_bytes);
 
 	while (!g_signal_received) {
-		if (!is_paused) {
+		if (!is_paused)
 			frame = capture.read_frame();
-		}
 
 		if (frame.empty()) continue;
 
 		// filter(frame, new_frame);
-		memcpy(new_frame.data(), frame.data, frame_size_bytes);
+		// memcpy(new_frame.data(), frame.data, frame_size_bytes);
 
 		if (sock.check_data()) {
 			trigger_hotkey();
 		}
 
-		virtual_camera.write_frame(new_frame.data(), capture.get_frame_size_bytes());
+		// virtual_camera.write_frame(new_frame.data(), capture.get_frame_size_bytes());
+		virtual_camera.write_frame(frame);
 		if (cv::waitKey(1)) {};
 	}
 

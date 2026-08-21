@@ -40,18 +40,18 @@ VirtualCamera::~VirtualCamera() {
 	int result = std::system("sudo modprobe -r v4l2loopback");
 	if (WEXITSTATUS(result) != 0) {
 		// throw std::runtime_error("Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)));
-		std::cerr << "Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)) << endl;
+		std::cerr << "Cannot remove virtual camera: exit code " + std::to_string(WEXITSTATUS(result)) << std::endl;
 	}
 }
 
 void VirtualCamera::configure() {
-	struct v4l2_format vid_format;
+	v4l2_format vid_format;
 	memset(&vid_format, 0, sizeof(vid_format));
 	vid_format.type					= V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	vid_format.fmt.pix.width		= resolution.width;
 	vid_format.fmt.pix.height		= resolution.height;
 	vid_format.fmt.pix.pixelformat	= V4L2_PIX_FMT_BGR24; // Force 24-bit BGR
-	vid_format.fmt.pix.sizeimage	= resolution.width * resolution.height * 3;
+	vid_format.fmt.pix.sizeimage	= resolution.pixel_count() * 3;
 	vid_format.fmt.pix.field		= V4L2_FIELD_NONE;
 	vid_format.fmt.pix.bytesperline = resolution.width * 3;
 	vid_format.fmt.pix.colorspace	= V4L2_COLORSPACE_SRGB;
@@ -76,4 +76,8 @@ int VirtualCamera::write_frame(byte* frame, uint32_t length) {
 		throw std::runtime_error("cannot write frame");
 
 	return written;
+}
+
+int VirtualCamera::write_frame(cv::Mat frame) {
+	return write_frame(frame.data, frame.total() * frame.channels());
 }

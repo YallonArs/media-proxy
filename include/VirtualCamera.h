@@ -2,6 +2,7 @@
 
 #include "VideoDevice.h"
 #include <string>
+#include <opencv2/opencv.hpp>
 
 class VirtualCamera : public VideoDevice {
 protected:
@@ -16,4 +17,5 @@ public:
 	void configure();
 	void open();
 	int write_frame(byte* frame, uint32_t length);
+	int write_frame(cv::Mat frame);
 };
