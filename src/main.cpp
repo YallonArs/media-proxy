@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "CameraCapture.h"
+#include "PipewireFilter.h"
 #include "Socket.h"
 #include "VideoDevice.h"
 #include "VirtualCamera.h"
@@ -44,6 +45,13 @@ void filter_video(cv::Mat frame, byte *new_frame) {
 	}
 }
 
+void filter_audio(float *src, float *dst, uint32_t n_samples) {
+	if (is_paused)
+		memset(dst, 0, n_samples * sizeof(float));
+	else
+		memcpy(dst, src, n_samples * sizeof(float));
+}
+
 void trigger_hotkey() {
 	is_paused = !is_paused;
 	cout << "cpp: hotkey detected" << endl;
@@ -53,6 +61,15 @@ int main(int argc, char *argv[]) {
 	// some shit
 	string path_to_camera = parse_args(argc, argv);
 	if (path_to_camera == "") return 0;
+
+	PipewireFilterProps props;
+	props.name        = "media-proxy-filter";
+	props.description = "Filter by YallonArs";
+	props.callback    = filter_audio;
+
+	PipewireFilter filter(argc, argv, props);
+	filter.start_in_thread();
+	cout << "pipewire filter started" << endl;
 
 	CameraCapture capture(path_to_camera);
 	capture.open();
