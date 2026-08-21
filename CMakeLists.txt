@@ -31,19 +31,3 @@ target_link_libraries(main PRIVATE
 )
 
 target_compile_options(main PRIVATE ${PIPEWIRE_CFLAGS_OTHER})
-
-add_executable(test_pipewire_filter
-    test_pipewire_filter.cpp
-    src/PipewireFilter.cpp
-)
-
-target_include_directories(test_pipewire_filter PRIVATE
-    include
-    ${PIPEWIRE_INCLUDE_DIRS}
-)
-
-target_link_libraries(test_pipewire_filter PRIVATE
-    ${PIPEWIRE_LIBRARIES}
-)
-
-target_compile_options(test_pipewire_filter PRIVATE ${PIPEWIRE_CFLAGS_OTHER})

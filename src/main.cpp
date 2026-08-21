@@ -24,6 +24,7 @@
 #include "VideoDevice.h"
 #include "VirtualCamera.h"
 #include "utils.h"
+#include "CameraStream.h"
 
 using std::cout;
 using std::endl;
@@ -40,16 +41,15 @@ inline void signal_handler(int _signum) {
 }
 
 void filter_video(cv::Mat frame, byte *new_frame) {
-	for (uint32_t i = 0; i < frame.total() * 3; i++) {
-		new_frame[i] = 255 - frame.data[i];
-	}
+	memcpy(new_frame, frame.data, frame.total() * frame.channels());
 }
 
 void filter_audio(float *src, float *dst, uint32_t n_samples) {
 	if (is_paused)
 		memset(dst, 0, n_samples * sizeof(float));
-	else
+	else {
 		memcpy(dst, src, n_samples * sizeof(float));
+	}
 }
 
 void trigger_hotkey() {
@@ -65,48 +65,39 @@ int main(int argc, char *argv[]) {
 	PipewireFilterProps props;
 	props.name        = "media-proxy-filter";
 	props.description = "Filter by YallonArs";
+	props.server_sock = "/run/user/1000/pipewire-0";
 	props.callback    = filter_audio;
 
 	PipewireFilter filter(argc, argv, props);
 	filter.start_in_thread();
 	cout << "pipewire filter started" << endl;
-
+	
 	CameraCapture capture(path_to_camera);
 	capture.open();
-
+	cout << "capture opened" << endl;
+	
 	VirtualCamera virtual_camera(VIRTUAL_CAMERA_ID, capture.resolution, "Virtual Camera by YallonArs");
 	virtual_camera.configure();
+	cout << "virtual camera configured" << endl;
 	virtual_camera.open();
-
-	std::signal(SIGINT, signal_handler);
-	cout << "ctrl-c hadndler registered" << endl;
+	
+	CameraStream stream(capture, virtual_camera, filter_video);
+	stream.start_in_thread(is_paused);
+	cout << "stream started" << endl;
 
 	Socket sock(SOCKET_PATH);
 	sock.connect();
-	cout << "socket created" << endl;
+	cout << "socket connected" << endl;
+	
+	std::signal(SIGINT, signal_handler);
+	cout << "ctrl-c hadndler registered" << endl;
 
-	cv::Mat frame;
 	cout << "starting" << endl;
 
-	uint32_t frame_size_bytes = capture.get_frame_size_bytes();
-	vector<byte> new_frame(frame_size_bytes);
-
 	while (!g_signal_received) {
-		if (!is_paused)
-			frame = capture.read_frame();
-
-		if (frame.empty()) continue;
-
-		// filter(frame, new_frame);
-		// memcpy(new_frame.data(), frame.data, frame_size_bytes);
-
 		if (sock.check_data()) {
 			trigger_hotkey();
 		}
-
-		// virtual_camera.write_frame(new_frame.data(), capture.get_frame_size_bytes());
-		virtual_camera.write_frame(frame);
-		if (cv::waitKey(1)) {};
 	}
 
 	return 0;

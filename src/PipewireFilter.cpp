@@ -1,7 +1,6 @@
 #include "PipewireFilter.h"
 
 #include <stdexcept>
-#include <magic_enum.hpp>
 #include <iostream>
 #include <thread>
 

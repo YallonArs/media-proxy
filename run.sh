@@ -12,10 +12,11 @@ fi
 
 source .venv/bin/activate
 pip3 install keyboard
-make -j
+cmake -B build
+cmake --build build --target main -j
 
 .venv/bin/python hotkey.py &
 sleep 2
-./main /dev/video0 &
+./build/main /dev/video0 &
 
 wait
