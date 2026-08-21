@@ -2,20 +2,36 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: install opencv
-      run: sudo apt-get install libopencv-dev libpipewire-0.3-dev
-    - name: comfigure
-      run: cmake -B build
-    - name: build
-      run: cmake --build build
+      - uses: actions/checkout@v4
+
+      - name: Install libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install libopencv-dev libpipewire-0.3-dev
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-ccache
+
+      - name: Check python script
+        run: python3 -m py_compile hotkey.py
+
+      - name: Configure
+        run: >
+          cmake -B build 
+          -DCMAKE_BUILD_TYPE=Release 
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache 
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build
+        run: cmake --build build -j

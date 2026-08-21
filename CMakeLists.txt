@@ -5,8 +5,15 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-g -Wall -Wextra -O2 -fsanitize=undefined,address)
-add_link_options(-fsanitize=undefined,address)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG   "-g3 -Og -Wall -Wextra -D_GLIBCXX_DEBUG -D_GLIBCXX_ASSERTIONS -fsanitize=address,undefined,leak -fno-omit-frame-pointer")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -Wall -Wextra -DNDEBUG -flto=auto -march=native -s -Wl,--gc-sections")
+
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG   "-fsanitize=address,undefined,leak")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
 
 # OpenCV
 find_package(OpenCV REQUIRED COMPONENTS core videoio highgui)
